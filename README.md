@@ -6,6 +6,8 @@ Deze repository bevat de source voor MCAD-RPD, een kleine analyse van de Marine 
 
 ## Installatie
 
+(Als de renv package niet geïnstalleerd is, installeer deze eerst met `Rscript -e "install.packages('renv')"`)
+
 Voer de volgende commands uit:
 ```bash
 Rscript renv.r
@@ -16,6 +18,7 @@ source .venv/bin/activate
 
 pip install -r requirements.txt
 ```
+
 ## Gebruik
 
 Data verwerken:
