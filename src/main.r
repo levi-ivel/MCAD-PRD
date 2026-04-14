@@ -10,6 +10,7 @@ tryCatch({
   mcad_data <- fromJSON(url, flatten = TRUE)
   write(toJSON(mcad_data, auto_unbox = TRUE), "data/data.json")
 }, error = function(e) {
+  warning("Kon data niet ophalen van URL, fallback naar data.json: ", e$message)
   mcad_data <- fromJSON("data/data.json", flatten = TRUE)
 })
 
@@ -59,35 +60,35 @@ cat("Victims:", nrow(victims_table), "rows\n")
 
 # Save alleen nieuwe data naar DuckDB
 # Rollback bij error
-  invisible(if (nrow(new_incidents) > 0) {
+invisible(if (nrow(new_incidents) > 0) {
   dbBegin(con)
   tryCatch({
     dbWriteTable(con, "incidents", new_incidents, append = TRUE)
     dbWriteTable(con, "victims", new_victims, append = TRUE)
 
-  # Join tables op basis van referenceNumber
-  joined_table <- con %>%
-    tbl("incidents") %>%
-    left_join(con %>% tbl("victims"), by = "referenceNumber")
+    # Join tables op basis van referenceNumber
+    joined_table <- con %>%
+      tbl("incidents") %>%
+      left_join(con %>% tbl("victims"), by = "referenceNumber")
 
-  # Filter de joined table op rows na 2020
-  filtered_table <- joined_table %>%
-    filter(year > 2020)
+    # Filter de joined table op rows na 2020
+    filtered_table <- joined_table %>%
+      filter(year > 2020)
 
-  # Aggregeer de joined table voor incidenten per jaar
-  aggregated_table <- joined_table %>%
-    group_by(year) %>%
-    summarise(count = n())
+    # Aggregeer de joined table voor incidenten per jaar
+    aggregated_table <- joined_table %>%
+      group_by(year) %>%
+      summarise(count = n())
 
-  # Drop verouderde tables
-  invisible(dbExecute(con, "DROP TABLE IF EXISTS joined"))
-  invisible(dbExecute(con, "DROP TABLE IF EXISTS filtered"))
-  invisible(dbExecute(con, "DROP TABLE IF EXISTS aggregated"))
+    # Drop verouderde tables
+    invisible(dbExecute(con, "DROP TABLE IF EXISTS joined"))
+    invisible(dbExecute(con, "DROP TABLE IF EXISTS filtered"))
+    invisible(dbExecute(con, "DROP TABLE IF EXISTS aggregated"))
 
-  # Bereken en save nieuwe tables vanuit DuckDB
-  joined_table <- compute(joined_table, name = "joined", temporary = FALSE)
-  filtered_table <- compute(filtered_table, name = "filtered", temporary = FALSE)
-  aggregated_table <- compute(aggregated_table, name = "aggregated", temporary = FALSE)
+    # Bereken en save nieuwe tables vanuit DuckDB
+    joined_table <- compute(joined_table, name = "joined", temporary = FALSE)
+    filtered_table <- compute(filtered_table, name = "filtered", temporary = FALSE)
+    aggregated_table <- compute(aggregated_table, name = "aggregated", temporary = FALSE)
     dbCommit(con)
   }, error = function(e) {
     dbRollback(con)

@@ -3,6 +3,14 @@ body {
     margin: 20px;
 }
 
+.home-center {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+}
+
 h1 {
     color: #333;
 }
@@ -22,7 +30,9 @@ button,
     border-radius: 4px;
     cursor: pointer;
     text-decoration: none;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 button:hover,

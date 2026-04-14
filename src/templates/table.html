@@ -1,25 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html lang="nl">
 <head>
     <title>MCAD Overzicht</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" type="image/png" href="/static/assets/logo.png">
 </head>
 <body>
-    <a href="/" class="back-button">← Terug naar overzicht</a>
+    <a href="/" class="back-button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Terug naar overzicht
+    </a>
     <h1>Tabel: {{ table_name }}</h1>
     <table>
-        <tr>
-            {% for column in columns %}
-            <th>{{ column }}</th>
+        <thead>
+            <tr>
+                {% for column in columns %}
+                <th>{{ column }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+            <tr>
+                {% for value in row %}
+                <td>{{ value }}</td>
+                {% endfor %}
+            </tr>
             {% endfor %}
-        </tr>
-        {% for row in data %}
-        <tr>
-            {% for value in row %}
-            <td>{{ value }}</td>
-            {% endfor %}
-        </tr>
-        {% endfor %}
+        </tbody>
     </table>
 </body>
 </html>

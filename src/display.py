@@ -43,7 +43,6 @@ def show_table(table_name):
         data = result.fetchall()
         return render_template("table.html", table_name=table_name, columns=columns, data=data)
     except Exception as e:
-        con.close()
         return f"Error: {str(e)}", 500
     finally:
         con.close()

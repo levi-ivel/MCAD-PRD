@@ -1,15 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="nl">
 <head>
     <title>MCAD Overzicht</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" type="image/png" href="/static/assets/logo.png">
 </head>
-<body>
+<body class="home-center">
     <h1>MCAD Overzicht</h1>
+    <p>Analyse op de Marine Cyber Attack Database van NHL Stenden - <a href="https://maritimecybersecurity.nl/" target="_blank">maritimecybersecurity.nl</a></p>
+    {% if table_names %}
+    <p>Klik op een knop om naar die table te gaan</p>
     <div class="button-container">
         {% for table in table_names %}
         <button onclick="location.href='/table/{{ table }}'">{{ table }}</button>
         {% endfor %}
     </div>
+    {% else %}
+    <p>Geen tables gevonden, run eerst main.r om data te krijgen</p>
+    {% endif %}
 </body>
 </html>

@@ -8,6 +8,5 @@ __pycache__/
 *.pyc
 
 renv/
-renv.lock
 
 mcad.duckdb
