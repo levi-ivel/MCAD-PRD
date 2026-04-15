@@ -23,6 +23,9 @@ jobs:
       - name: Set up renv
         uses: r-lib/actions/setup-renv@v2
 
+      - name: Install R dependencies from renv.r
+        run: Rscript renv.r
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -31,6 +34,10 @@ jobs:
 
       - name: Install Python dependencies
         run: pip install -r requirements.txt
+
+      - name: Install DuckDB extensions
+        run: |
+          Rscript -e "con <- DBI::dbConnect(duckdb::duckdb(), 'data/mcad.duckdb'); DBI::dbExecute(con, 'INSTALL fts; LOAD fts;'); DBI::dbDisconnect(con)"
 
       - name: Update data
         run: Rscript src/main.r
@@ -77,6 +84,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m \"Hourly update: data and rendered HTML\"
+            git commit -m "Hourly update: data and rendered HTML"
             git push
           fi
