@@ -31,7 +31,7 @@
             </thead>
             <tbody>
                 {% for row in data %}
-                <tr>
+                <tr id="row-{{ row[0] }}">
                     {% for value in row %}
                     <td>{{ value }}</td>
                     {% endfor %}
@@ -40,5 +40,20 @@
             </tbody>
         </table>
     </div>
+
+    <script>
+        // Scroll naar gegeven row in de table
+        function scrollToTarget() {
+            const hash = window.location.hash;
+            if (hash && hash.startsWith('#row-')) {
+                const element = document.querySelector(hash);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+        window.addEventListener('load', scrollToTarget);
+        window.addEventListener('hashchange', scrollToTarget);
+    </script>
 </body>
 </html>

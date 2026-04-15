@@ -29,6 +29,22 @@ p { font-size: 0.95rem; color: var(--text-secondary); }
     to { opacity: 1; }
 }
 
+.content-fade {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0;
+    animation: simpleFadeIn 0.4s ease-out forwards;
+}
+
+.footer-link {
+    font-size: 0.8rem;
+    margin-top: 1rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
 .home-center {
     display: flex;
     flex-direction: column;
@@ -134,6 +150,96 @@ td {
 
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: #fcfcfc; }
+
+tr:target td {
+    background-color: rgba(0, 153, 130, 0.1) !important;
+    border-top: 1px solid #009982;
+    border-bottom: 1px solid #009982;
+    animation: highlightFade 3s ease-out;
+}
+
+@keyframes highlightFade {
+    0% { background-color: rgba(0, 153, 130, 0.3); }
+    100% { background-color: rgba(0, 153, 130, 0.1); }
+}
+
+.search-result-row {
+    cursor: pointer;
+}
+
+.search-result-row:hover td {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+.search-result-row:active td {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.search-form {
+    margin: 2rem 0;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.search-input {
+    flex-grow: 1;
+    padding: 0.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    font-family: inherit;
+    font-size: 0.85rem;
+}
+
+.search-results-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto 2rem auto;
+    background: rgba(0, 0, 0, 0.02);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.search-results-container h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.search-results-table {
+    width: 100%;
+    text-align: left;
+}
+
+.search-results-table th {
+    padding: 0.6rem;
+    border-bottom: 2px solid var(--border);
+    background: transparent;
+    position: static;
+}
+
+.search-results-table td {
+    padding: 0.6rem;
+}
+
+.no-results {
+    margin: 1rem 0;
+    font-style: italic;
+}
+
+.cyber-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+.cyber-link:hover {
+    color: #009982;
+    border-bottom-color: #009982;
+}
 
 @media (max-width: 768px) {
     body:not(.home-center) { padding: 1rem; }

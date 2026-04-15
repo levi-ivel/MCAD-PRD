@@ -7,10 +7,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="home-center">
-    <div class="content-fade" style="width: 100%; display: flex; flex-direction: column; align-items: center; opacity: 0; animation: simpleFadeIn 0.4s ease-out forwards;">
+    <div class="content-fade">
         <h1>MCAD Overzicht</h1>
         <p>Analyse op de Marine Cyber Attack Database van NHL Stenden</p>
-        <p style="font-size: 0.8rem; margin-top: 1rem; letter-spacing: 0.05em; text-transform: uppercase;"><a href="https://maritimecybersecurity.nl/" target="_blank" style="color: var(--text-secondary); border-bottom: 1px solid rgba(0,0,0,0.1);">maritimecybersecurity.nl</a></p>
+        <p class="footer-link"><a href="https://maritimecybersecurity.nl/" target="_blank" class="cyber-link">maritimecybersecurity.nl</a></p>
         
         {% if table_names %}
         <div class="button-container">
@@ -22,6 +22,40 @@
         <div class="empty-state">
             <p>Geen tables gevonden, run eerst main.r om data te krijgen</p>
         </div>
+        {% endif %}
+
+        <form action="/" method="get" class="search-form">
+            <input type="text" name="q" placeholder="Zoek incidenten..." value="{{ search_query or '' }}" class="search-input">
+            <button type="submit" class="search-button">Zoeken</button>
+        </form>
+
+        {% if search_results %}
+        <div class="search-results-container">
+            <h3>Zoekresultaten voor "{{ search_query }}"</h3>
+            <table class="search-results-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Titel</th>
+                        <th>Jaar</th>
+                        <th>Land</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in search_results %}
+                    <tr onclick="location.href='/table/joined#row-{{ row.id }}'" 
+                        class="search-result-row">
+                        <td>{{ row.id }}</td>
+                        <td>{{ row.title }}</td>
+                        <td>{{ row.year }}</td>
+                        <td>{{ row.country }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif search_query %}
+        <p class="no-results">Geen resultaten gevonden voor "{{ search_query }}"</p>
         {% endif %}
     </div>
 </body>

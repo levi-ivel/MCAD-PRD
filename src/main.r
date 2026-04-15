@@ -16,6 +16,9 @@ tryCatch({
 
 con <- dbConnect(duckdb(), dbdir = "data/mcad.duckdb")
 
+dbExecute(con, "INSTALL fts")
+dbExecute(con, "LOAD fts")
+
 # Maak een incidenten table van de titel, methode, jaar en positie
 incidents_table <- mcad_data %>%
   select(referenceNumber, title, method, year, position.lat, position.lng) %>%
@@ -50,11 +53,9 @@ existing_refs <- tryCatch({
 new_incidents <- incidents_table[!incidents_table$referenceNumber %in% existing_refs, ]
 new_victims <- victims_table[!victims_table$referenceNumber %in% existing_refs, ]
 
-# Print nieuwe rows
 cat("Nieuwe incidents:", nrow(new_incidents), "rows\n")
 cat("Nieuwe victims:", nrow(new_victims), "rows\n")
 
-# Print aantal rows
 cat("Incidents:", nrow(incidents_table), "rows\n")
 cat("Victims:", nrow(victims_table), "rows\n")
 
@@ -89,6 +90,10 @@ invisible(if (nrow(new_incidents) > 0) {
     joined_table <- compute(joined_table, name = "joined", temporary = FALSE)
     filtered_table <- compute(filtered_table, name = "filtered", temporary = FALSE)
     aggregated_table <- compute(aggregated_table, name = "aggregated", temporary = FALSE)
+
+    # Maak search index van de joined table
+    dbExecute(con, "PRAGMA create_fts_index('joined', 'referenceNumber', 'title', 'method', 'viccountry', 'area', overwrite=1)")
+
     dbCommit(con)
   }, error = function(e) {
     dbRollback(con)
@@ -96,7 +101,6 @@ invisible(if (nrow(new_incidents) > 0) {
   })
 })
 
-# Print aantal rows
 cat("Joined:", con %>% tbl("joined") %>% tally() %>% pull(), "rows\n")
 cat("Filtered:", con %>% tbl("filtered") %>% tally() %>% pull(), "rows\n")
 cat("Aggregated:", con %>% tbl("aggregated") %>% tally() %>% pull(), "rows\n")
