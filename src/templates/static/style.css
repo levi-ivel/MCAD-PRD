@@ -158,6 +158,12 @@ tr:target td {
     animation: highlightFade 3s ease-out;
 }
 
+tr.highlighted td {
+    background-color: rgba(0, 153, 130, 0.15) !important;
+    border-top: 1px solid #009982;
+    border-bottom: 1px solid #009982;
+}
+
 @keyframes highlightFade {
     0% { background-color: rgba(0, 153, 130, 0.3); }
     100% { background-color: rgba(0, 153, 130, 0.1); }
@@ -245,4 +251,33 @@ tr:target td {
     body:not(.home-center) { padding: 1rem; }
     .table-header h1 { font-size: 1.25rem; }
     .home-center h1 { font-size: 1.75rem; }
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-shrink: 0;
+}
+
+.page-link {
+    text-decoration: none;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: all 0.2s ease;
+}
+
+.page-link:hover {
+    color: var(--text-primary);
+    border-color: var(--text-primary);
+}
+
+.page-info {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
 }

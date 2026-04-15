@@ -16,9 +16,6 @@ tryCatch({
 
 con <- dbConnect(duckdb(), dbdir = "data/mcad.duckdb")
 
-dbExecute(con, "INSTALL fts")
-dbExecute(con, "LOAD fts")
-
 # Create incidents table from title, method, year and position
 incidents_table <- mcad_data %>%
   select(referenceNumber, title, method, year, position.lat, position.lng) %>%
