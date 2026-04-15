@@ -75,6 +75,24 @@ jobs:
                   f.write(response.data)
           "
 
+      - name: Debug - show git status and diff
+        run: |
+          echo "=== Git status ==="
+          git status
+          echo "=== Git diff ==="
+          git diff
+          echo "=== Git diff --staged ==="
+          git diff --staged
+          echo "=== HTML dir contents ==="
+          ls -laR html/
+          echo "=== data dir contents ==="
+          ls -la data/
+          echo "=== Git remote ==="
+          git remote -v
+          echo "=== Current branch ==="
+          git branch -a
+          echo "=== GH_REF_NAME = ${{ github.ref_name }} ==="
+
       - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
