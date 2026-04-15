@@ -43,7 +43,7 @@
                 </thead>
                 <tbody>
                     {% for row in search_results %}
-                    <tr onclick="location.href='/table/joined#row-{{ row.id }}'" 
+                    <tr onclick="location.href='/table/joined?row_id={{ row.id }}'" 
                         class="search-result-row">
                         <td>{{ row.id }}</td>
                         <td>{{ row.title }}</td>

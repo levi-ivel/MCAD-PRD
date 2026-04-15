@@ -4,12 +4,13 @@ from flask import render_template
 
 app = flask.Flask(__name__, template_folder='templates', static_folder='templates/static')
 
+VALID_TABLES = ['incidents', 'victims', 'joined', 'filtered', 'aggregated']
+
 @app.route("/")
 def home():
     con = duckdb.connect("data/mcad.duckdb")
     try:
-        # All available tables
-        table_names = ['incidents', 'victims', 'joined', 'filtered', 'aggregated']
+        table_names = VALID_TABLES
 
         # DuckDB Search functionality
         # Convert result rows to dictionary entries
@@ -17,8 +18,6 @@ def home():
         search_results = None
         if search_query:
             try:
-                con.execute("INSTALL fts")
-                con.execute("LOAD fts")
                 query = """
                     SELECT referenceNumber, title, method, year, viccountry, area,
                            fts_main_joined.match_bm25(referenceNumber, ?) AS score
@@ -51,14 +50,34 @@ def home():
 
 @app.route("/table/<table_name>")
 def show_table(table_name):
+    # Validate query
+    if table_name not in VALID_TABLES:
+        return render_template('404.html'), 404
+    
     con = duckdb.connect("data/mcad.duckdb")
     try:
-        # Get all rows from given table
-        result = con.execute(f'SELECT * FROM "{table_name}"')
+        # Get total rows and split into pages, 100 per page
+        total = con.execute(f'SELECT COUNT(*) FROM "{table_name}"').fetchone()[0]
+        per_page = 100
+        total_pages = (total + per_page - 1) // per_page
+
+        columns = con.execute("SELECT column_name FROM information_schema.columns WHERE table_name = ?", [table_name]).fetchall()
+        col_names = [c[0] for c in columns]
+        order_col = 'referenceNumber' if 'referenceNumber' in col_names else col_names[0]
+
+        # Get location of given row_id in the table
+        row_id = flask.request.args.get('row_id')
+        if row_id:
+            count = con.execute(f'SELECT COUNT(*) FROM "{table_name}" WHERE "{order_col}" < ?', [row_id]).fetchone()[0]
+            page = (count // per_page) + 1
+        else:
+            page = flask.request.args.get('page', 1, type=int)
+
+        offset = (page - 1) * per_page
+        result = con.execute(f'SELECT * FROM "{table_name}" ORDER BY "{order_col}" LIMIT ? OFFSET ?', [per_page, offset])
         columns = [desc[0] for desc in result.description]
         data = result.fetchall()
-        row_count = len(data)
-        return render_template("table.html", table_name=table_name, columns=columns, data=data, row_count=row_count)
+        return render_template("table.html", table_name=table_name, columns=columns, data=data, row_count=total, page=page, total_pages=total_pages, per_page=per_page, row_id=row_id)
     except Exception as e:
         return render_template('404.html'), 404
     finally:

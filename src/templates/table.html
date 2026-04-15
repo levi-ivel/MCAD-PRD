@@ -31,7 +31,7 @@
             </thead>
             <tbody>
                 {% for row in data %}
-                <tr id="row-{{ row[0] }}">
+                <tr id="row-{{ row[0] }}" {% if row_id and row[0]|string == row_id|string %}class="highlighted"{% endif %}>
                     {% for value in row %}
                     <td>{{ value }}</td>
                     {% endfor %}
@@ -41,19 +41,28 @@
         </table>
     </div>
 
+    {% if total_pages > 1 %}
+    <div class="pagination">
+        {% if page > 1 %}
+        <a href="/table/{{ table_name }}?page={{ page - 1 }}" class="page-link">Previous</a>
+        {% endif %}
+        <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+        {% if page < total_pages %}
+        <a href="/table/{{ table_name }}?page={{ page + 1 }}" class="page-link">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
     <script>
         // Scroll to given row in the table
-        function scrollToTarget() {
-            const hash = window.location.hash;
-            if (hash && hash.startsWith('#row-')) {
-                const element = document.querySelector(hash);
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
+        window.addEventListener('load', function() {
+            {% if row_id %}
+            const element = document.getElementById('row-{{ row_id }}');
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-        }
-        window.addEventListener('load', scrollToTarget);
-        window.addEventListener('hashchange', scrollToTarget);
+            {% endif %}
+        });
     </script>
 </body>
 </html>
