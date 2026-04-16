@@ -54,7 +54,9 @@ def show_table(table_name):
     # Validate query
     if table_name not in VALID_TABLES:
         return render_template('404.html'), 404
-    
+
+    is_static = flask.request.args.get('is_static') == '1'
+
     con = duckdb.connect("data/mcad.duckdb")
     try:
         # Get total rows and split into pages, 100 per page
@@ -78,7 +80,7 @@ def show_table(table_name):
         result = con.execute(f'SELECT * FROM "{table_name}" ORDER BY "{order_col}" LIMIT ? OFFSET ?', [per_page, offset])
         columns = [desc[0] for desc in result.description]
         data = result.fetchall()
-        return render_template("table.html", table_name=table_name, columns=columns, data=data, row_count=total, page=page, total_pages=total_pages, per_page=per_page, row_id=row_id)
+        return render_template("table.html", table_name=table_name, columns=columns, data=data, row_count=total, page=page, total_pages=total_pages, per_page=per_page, row_id=row_id, is_static=is_static)
     except Exception as e:
         return render_template('404.html'), 404
     finally:

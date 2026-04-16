@@ -8,7 +8,7 @@ This repository contains the source code for MCAD-RPD, a small-scoped analysis o
 
 ## GitHub Action
 
-A GitHub Action is configured to run every hour. It fetches the latest data from [maritimecybersecurity.nl](https://maritimecybersecurity.nl/public/allItems), updates the `data/` directory, and renders the pages into the `html/` folder.
+A GitHub Action is configured to run the data processing script daily, along with rendering the HTML pages from Flask to allow for static hosting on GitHub Pages.
 
 ## Installation
 

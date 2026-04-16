@@ -43,12 +43,22 @@
 
     {% if total_pages > 1 %}
     <div class="pagination">
-        {% if page > 1 %}
-        <a href="{% if page == 2 %}./{% else %}page{{ page - 1 }}.html{% endif %}" class="page-link">Previous</a>
-        {% endif %}
-        <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
-        {% if page < total_pages %}
-        <a href="page{{ page + 1 }}.html" class="page-link">Next</a>
+        {% if is_static %}
+            {% if page > 1 %}
+            <a href="{% if page == 2 %}./{% else %}page{{ page - 1 }}.html{% endif %}" class="page-link">Previous</a>
+            {% endif %}
+            <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+            {% if page < total_pages %}
+            <a href="page{{ page + 1 }}.html" class="page-link">Next</a>
+            {% endif %}
+        {% else %}
+            {% if page > 1 %}
+            <a href="/table/{{ table_name }}?page={{ page - 1 }}" class="page-link">Previous</a>
+            {% endif %}
+            <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+            {% if page < total_pages %}
+            <a href="/table/{{ table_name }}?page={{ page + 1 }}" class="page-link">Next</a>
+            {% endif %}
         {% endif %}
     </div>
     {% endif %}
