@@ -1,0 +1,104 @@
+name: Daily Update and Render
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  update-and-render:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - name: Set up renv
+        uses: r-lib/actions/setup-renv@v2
+
+      - name: Install R dependencies from renv.r
+        run: Rscript renv.r
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install DuckDB extensions
+        run: |
+          Rscript -e "con <- DBI::dbConnect(duckdb::duckdb(), 'data/mcad.duckdb'); DBI::dbExecute(con, 'INSTALL fts; LOAD fts;'); DBI::dbDisconnect(con)"
+
+      - name: Update data
+        run: Rscript src/main.r
+
+      - name: Render pages to HTML
+        run: |
+          export PYTHONPATH=$PYTHONPATH:.
+          python3 -c "
+          import os, shutil
+          from src.display import app, VALID_TABLES
+          
+          client = app.test_client()
+          os.makedirs('html', exist_ok=True)
+          
+          # Copy static files to the html directory
+          static_src = 'src/templates/static'
+          static_dst = 'html/static'
+          if os.path.exists(static_src):
+              if os.path.exists(static_dst):
+                  shutil.rmtree(static_dst)
+              shutil.copytree(static_src, static_dst)
+          
+          # Render home page
+          print('Rendering index.html...')
+          response = client.get('/')
+          with open('html/index.html', 'wb') as f:
+              f.write(response.data)
+          
+          # Render each table page
+          for table in VALID_TABLES:
+              print(f'Rendering table: {table}...')
+              os.makedirs(f'html/table/{table}', exist_ok=True)
+              response = client.get(f'/table/{table}')
+              with open(f'html/table/{table}/index.html', 'wb') as f:
+                  f.write(response.data)
+          "
+
+      - name: Debug - show git status and diff
+        run: |
+          echo "=== Git status ==="
+          git status
+          echo "=== Git diff ==="
+          git diff
+          echo "=== Git diff --staged ==="
+          git diff --staged
+          echo "=== HTML dir contents ==="
+          ls -laR html/
+          echo "=== data dir contents ==="
+          ls -la data/
+          echo "=== Git remote ==="
+          git remote -v
+          echo "=== Current branch ==="
+          git branch -a
+          echo "=== GH_REF_NAME = ${{ github.ref_name }} ==="
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./html
+          publish_branch: gh-pages
+          force_orphan: true
