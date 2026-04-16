@@ -64,17 +64,31 @@ jobs:
           
           # Render home page
           print('Rendering index.html...')
-          response = client.get('/')
+          response = client.get('/?is_static=1')
           with open('html/index.html', 'wb') as f:
-              f.write(response.data)
+            f.write(response.data)
           
           # Render each table page
           for table in VALID_TABLES:
               print(f'Rendering table: {table}...')
               os.makedirs(f'html/table/{table}', exist_ok=True)
-              response = client.get(f'/table/{table}')
-              with open(f'html/table/{table}/index.html', 'wb') as f:
-                  f.write(response.data)
+
+              # Get total pages for this table
+              import json
+              response = client.get(f'/api/table_info/{table}')
+              table_info = json.loads(response.data)
+              total_pages = table_info.get('total_pages', 1)
+
+              # Render all pages
+              for page in range(1, total_pages + 1):
+                  print(f'  Rendering page {page} of {total_pages}...')
+                  response = client.get(f'/table/{table}?page={page}&is_static=1')
+                  if page == 1:
+                      filename = 'index.html'
+                  else:
+                      filename = f'page{page}.html'
+                  with open(f'html/table/{table}/{filename}', 'wb') as f:
+                      f.write(response.data)
           "
 
       - name: Debug - show git status and diff

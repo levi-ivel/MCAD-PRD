@@ -11,6 +11,7 @@ def home():
     con = duckdb.connect("data/mcad.duckdb")
     try:
         table_names = VALID_TABLES
+        is_static = flask.request.args.get('is_static') == '1'
 
         # DuckDB Search functionality
         # Convert result rows to dictionary entries
@@ -42,7 +43,7 @@ def home():
                 app.logger.error(f"FTS Search Error: {e}")
                 search_results = []
 
-        return render_template("home.html", table_names=table_names, search_results=search_results, search_query=search_query)
+        return render_template("home.html", table_names=table_names, search_results=search_results, search_query=search_query, is_static=is_static)
     except Exception as e:
         return f"Error: {str(e)}", 500
     finally:
@@ -80,6 +81,22 @@ def show_table(table_name):
         return render_template("table.html", table_name=table_name, columns=columns, data=data, row_count=total, page=page, total_pages=total_pages, per_page=per_page, row_id=row_id)
     except Exception as e:
         return render_template('404.html'), 404
+    finally:
+        con.close()
+
+@app.route("/api/table_info/<table_name>")
+def table_info(table_name):
+    if table_name not in VALID_TABLES:
+        return flask.jsonify({"error": "Invalid table"}), 404
+
+    con = duckdb.connect("data/mcad.duckdb")
+    try:
+        total = con.execute(f'SELECT COUNT(*) FROM "{table_name}"').fetchone()[0]
+        per_page = 100
+        total_pages = (total + per_page - 1) // per_page
+        return flask.jsonify({"total": total, "total_pages": total_pages, "per_page": per_page})
+    except Exception as e:
+        return flask.jsonify({"error": str(e)}), 500
     finally:
         con.close()
 
